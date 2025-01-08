@@ -6,7 +6,7 @@ dotenv.config();
 
 // Crear la conexión
 const pool = mysql.createPool({
-    host: "http://sql3.freesqldatabase.com",
+    host: "sql3.freesqldatabase.com",
     user: "sql3756588",
     password: "6VRqjIP516",
     database: "sql3756588",
