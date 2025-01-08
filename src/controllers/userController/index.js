@@ -50,7 +50,7 @@ const loginOrRegisterUser = async ({ name, email, password }) => {
 
     // Crear nuevo usuario
     if (!name) {
-        throw new Error('El nombre es requerido para registrar un nuevo usuario');
+        throw new Error('Credenciales inválidas');
     }
 
     const result = await userModel.createUser(name, email, password);
