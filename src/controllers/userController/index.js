@@ -45,10 +45,10 @@ const loginOrRegisterUser = async ({ name, email, password }) => {
         };
 
         // Buscar la suscripción del usuario
-        const subscription = await paymentModel.getPaymentByUserId(user.id);
+        const allSubscriptions = await paymentModel.getPaymentByUserId(user.id);
 
         // Retornar el usuario logueado con la información de la suscripción
-        return { user, subscription, isNewUser: false };
+        return { user, subscription: allSubscriptions? allSubscriptions[allSubscriptions.length - 1] : null, allSubscriptions, isNewUser: false };
     };
 
     // Crear nuevo usuario
@@ -71,7 +71,7 @@ const loginUser = async (req, res) => {
     };
 
     try {
-        const { user, subscription, isNewUser } = await loginOrRegisterUser({ name, email, password });
+        const { user, subscription, isNewUser, allSubscriptions } = await loginOrRegisterUser({ name, email, password });
 
         if (!subscription) {
             return res.status(200).json({
@@ -79,6 +79,7 @@ const loginUser = async (req, res) => {
                 message: isNewUser ? 'Usuario creado y logueado' : 'Login exitoso',
                 user,
                 subscription,
+                allSubscriptions
             });
         };
 
@@ -88,6 +89,7 @@ const loginUser = async (req, res) => {
             message: isNewUser ? 'Usuario creado y logueado' : 'Login exitoso',
             user,
             subscription: { amount, created_at: formatDate(created_at), currency, status },
+            allSubscriptions,
         });
 
     } catch (error) {

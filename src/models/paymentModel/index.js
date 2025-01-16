@@ -38,7 +38,7 @@ const getPaymentById = async (paymentId) => {
 const getPaymentByUserId = async (userId) => {
     try {
         const [rows] = await db.execute('SELECT * FROM payments WHERE user_id = ?', [userId]);
-        return rows[0] || null;
+        return rows || null;
     } catch (error) {
         console.error('Error al obtener los pagos del usuario:', error);
         throw error;
