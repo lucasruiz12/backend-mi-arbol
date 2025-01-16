@@ -1,7 +1,7 @@
-// src/controllers/userController.js
-
+const paymentModel = require('../../models/paymentModel');
 const userModel = require('../../models/userModel');
-const db = require('../../../db');
+const { formatDate } = require('../../utils/functions');
+// const db = require('../../../db');
 
 // Crear un usuario
 const createUser = async (req, res) => {
@@ -9,7 +9,7 @@ const createUser = async (req, res) => {
 
     if (!name || !email || !password) {
         return res.status(400).json({ success: false, message: 'Faltan datos' });
-    }
+    };
 
     try {
         const existingUser = await userModel.getUserByEmail(email);
@@ -31,7 +31,7 @@ const createUser = async (req, res) => {
 const loginOrRegisterUser = async ({ name, email, password }) => {
     if (!email || !password) {
         throw new Error('Email y contraseña son requeridos');
-    }
+    };
 
     // Buscar usuario por email
     const existingUser = await userModel.getUserByEmail(email);
@@ -42,22 +42,25 @@ const loginOrRegisterUser = async ({ name, email, password }) => {
         // Validar contraseña
         if (user.password !== password) {
             throw new Error('Credenciales inválidas');
-        }
+        };
 
-        // Retornar el usuario logueado
-        return { user, isNewUser: false };
-    }
+        // Buscar la suscripción del usuario
+        const subscription = await paymentModel.getPaymentByUserId(user.id);
+
+        // Retornar el usuario logueado con la información de la suscripción
+        return { user, subscription, isNewUser: false };
+    };
 
     // Crear nuevo usuario
     if (!name) {
         throw new Error('Credenciales inválidas');
-    }
+    };
 
     const result = await userModel.createUser(name, email, password);
     const [newUser] = await userModel.getUserById(result.insertId);
 
-    // Retornar el nuevo usuario creado
-    return { user: newUser, isNewUser: true };
+    // Retornar el nuevo usuario creado sin suscripción
+    return { user: newUser, subscription: null, isNewUser: true };
 };
 
 const loginUser = async (req, res) => {
@@ -65,16 +68,28 @@ const loginUser = async (req, res) => {
 
     if (!email || !password) {
         return res.status(400).json({ success: false, message: 'Email y contraseña son requeridos' });
-    }
+    };
 
     try {
-        const { user, isNewUser } = await loginOrRegisterUser({ name, email, password });
+        const { user, subscription, isNewUser } = await loginOrRegisterUser({ name, email, password });
 
+        if (!subscription) {
+            return res.status(200).json({
+                success: true,
+                message: isNewUser ? 'Usuario creado y logueado' : 'Login exitoso',
+                user,
+                subscription,
+            });
+        };
+
+        const { amount, created_at, currency, status } = subscription;
         return res.status(200).json({
             success: true,
             message: isNewUser ? 'Usuario creado y logueado' : 'Login exitoso',
-            user
+            user,
+            subscription: { amount, created_at: formatDate(created_at), currency, status },
         });
+
     } catch (error) {
         return res.status(400).json({
             success: false,
