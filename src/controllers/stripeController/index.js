@@ -7,7 +7,7 @@ const createCheckoutSession = async (req, res) => {
     const { amount, userId, email } = req.body;
 
     try {
-        // Verifica si el usuario existe
+        // Verifica usuario
         const user = await UserModel.getUserById(userId);
         if (!user) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
