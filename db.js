@@ -5,35 +5,29 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 // Crear la conexión
+
+// Conexión a DB en desarrollo local
+
 // const pool = mysql.createPool({
-//     host: "sql3.freesqldatabase.com",
-//     user: "sql3756588",
-//     password: "6VRqjIP516",
-//     database: "sql3756588",
-//     port: process.env.DB_PORT,
+//     host: process.env.DB_LOCAL_HOST,
+//     user: process.env.DB_LOCAL_USER,
+//     password: process.env.DB_LOCAL_PASSWORD,
+//     database: process.env.DB_LOCAL_NAME,
+//     port: process.env.DB_LOCAL_PORT,
 //     waitForConnections: true,
 //     connectionLimit: 10,
 //     queueLimit: 0,
 // });
-// const pool = mysql.createPool({
-//     host: process.env.DB_HOST,
-//     user: process.env.DB_USER,
-//     password: process.env.DB_PASSWORD,
-//     database: process.env.DB_NAME,
-//     port: process.env.DB_PORT,
-//     waitForConnections: true,
-//     connectionLimit: 10,
-//     queueLimit: 0,
-// });
+
 const pool = mysql.createPool({
-    host: 'roundhouse.proxy.rlwy.net',
-    user: 'root',
-    password: 'AWKyDEqzlVTzShgrxSzEPJzKDHmWTnIR',
-    database: 'railway',
-    port: 13833,
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT,
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
 });
 
 module.exports = pool.promise();
