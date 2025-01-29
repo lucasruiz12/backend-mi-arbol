@@ -5,7 +5,7 @@ const { formatDate } = require('../../utils/functions');
 
 // Crear un usuario
 const createUser = async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, carbonPoints } = req.body;
 
     if (!name || !email || !password) {
         return res.status(400).json({ success: false, message: 'Faltan datos' });
@@ -19,8 +19,7 @@ const createUser = async (req, res) => {
                 message: 'No se puede usar este correo',
             });
         };
-
-        const result = await userModel.createUser(name, email, password);
+        const result = await userModel.createUser(name, email, password, carbonPoints);
         const [user] = await userModel.getUserById(result.insertId);
         return res.status(201).json({ success: true, message: 'Usuario creado', user });
     } catch (error) {
@@ -28,7 +27,31 @@ const createUser = async (req, res) => {
     };
 };
 
-const loginOrRegisterUser = async ({ name, email, password }) => {
+const updateUser = async (req, res) => {
+    const { userId, email } = req.body;
+
+    if (!userId || !email) {
+        return res.status(400).json({ success: false, message: 'Faltan datos' });
+    }
+
+    try {
+        // Verifica si el usuario existe
+        const user = await userModel.getUserById(userId);
+        if (!user.length) {
+            return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+        }
+
+        // Actualiza el correo del usuario
+        await userModel.updateUser(userId, { email });
+
+        return res.status(200).json({ success: true, message: 'Correo actualizado correctamente' });
+    } catch (error) {
+        console.error('Error al actualizar el correo del usuario:', error);
+        return res.status(500).json({ success: false, message: 'Error al actualizar usuario', error });
+    }
+};
+
+const loginOrRegisterUser = async ({ name, email, password, carbonPoints }) => {
     if (!email || !password) {
         throw new Error('Email y contraseña son requeridos');
     };
@@ -48,7 +71,7 @@ const loginOrRegisterUser = async ({ name, email, password }) => {
         const allSubscriptions = await paymentModel.getPaymentByUserId(user.id);
 
         // Retornar el usuario logueado con la información de la suscripción
-        return { user, subscription: allSubscriptions? allSubscriptions[allSubscriptions.length - 1] : null, allSubscriptions, isNewUser: false };
+        return { user, subscription: allSubscriptions ? allSubscriptions[allSubscriptions.length - 1] : null, allSubscriptions, isNewUser: false };
     };
 
     // Crear nuevo usuario
@@ -56,7 +79,7 @@ const loginOrRegisterUser = async ({ name, email, password }) => {
         throw new Error('Credenciales inválidas');
     };
 
-    const result = await userModel.createUser(name, email, password);
+    const result = await userModel.createUser(name, email, password, carbonPoints);
     const [newUser] = await userModel.getUserById(result.insertId);
 
     // Retornar el nuevo usuario creado sin suscripción
@@ -64,14 +87,14 @@ const loginOrRegisterUser = async ({ name, email, password }) => {
 };
 
 const loginUser = async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, carbonPoints } = req.body;
 
     if (!email || !password) {
         return res.status(400).json({ success: false, message: 'Email y contraseña son requeridos' });
     };
 
     try {
-        const { user, subscription, isNewUser, allSubscriptions } = await loginOrRegisterUser({ name, email, password });
+        const { user, subscription, isNewUser, allSubscriptions } = await loginOrRegisterUser({ name, email, password, carbonPoints });
 
         if (!subscription) {
             return res.status(200).json({
@@ -100,4 +123,4 @@ const loginUser = async (req, res) => {
     }
 };
 
-module.exports = { createUser, loginUser };
+module.exports = { createUser, updateUser, loginUser };

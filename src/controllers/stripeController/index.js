@@ -31,7 +31,7 @@ const createCheckoutSession = async (req, res) => {
                 },
             ],
             mode: 'subscription',
-            customer_email: email,
+            customer_email: email.includes("@") ? email : undefined,
             success_url: `${process.env.CLIENT_URL}/successPayment`,
             cancel_url: `${process.env.CLIENT_URL}/failurePayment`,
             metadata: { userId },
@@ -61,7 +61,9 @@ const verifyPayment = async (req, res) => {
                 session.metadata.userId
             );
 
-            const subscriptionDate = formatDate(session.created)
+            const subscriptionDate = formatDate(session.created);
+
+            const userEmail = session.customer_details.email;
 
             const paymentData = {
                 amount: session.amount_total / 100,
@@ -70,7 +72,7 @@ const verifyPayment = async (req, res) => {
                 paid: session.payment_status === 'paid',
             };
 
-            return res.status(200).json({ success: true, message: "Pago realizado exitosamente", paymentData });
+            return res.status(200).json({ success: true, message: "Pago realizado exitosamente", paymentData, userEmail });
         } else {
             return res.status(304).json({ success: false, message: "No se efectuó correctamente el pago" });
         }
