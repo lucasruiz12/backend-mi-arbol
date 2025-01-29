@@ -4,6 +4,10 @@ const db = require('../../../db');
 const getUserByEmail = async (email) => {
     try {
         const [rows] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
+        if (rows.length === 0) {
+            const [bySub] = await db.execute('SELECT * FROM users WHERE sub = ?', [email]);
+            return bySub;
+        };
         return rows;
     } catch (error) {
         console.error('Error al verificar el correo:', error);
@@ -11,11 +15,11 @@ const getUserByEmail = async (email) => {
     };
 };
 
-const createUser = async (name, email, password, carbonPoints) => {
+const createUser = async (name, email, password, carbonPoints, sub) => {
     try {
         const [result] = await db.execute(
-            'INSERT INTO users (name, email, password, carbonPoints) VALUES (?, ?, ?, ?)',
-            [name, email, password, carbonPoints]
+            'INSERT INTO users (name, email, password, carbonPoints, sub) VALUES (?, ?, ?, ?, ?)',
+            [name, email, password, carbonPoints, sub ?? null]
         );
         return result;
     } catch (error) {
