@@ -13,23 +13,64 @@ const createCheckoutSession = async (req, res) => {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
-        // Crea un "price" para la suscripción personalizada
+        // Busca el último pago del usuario
+        const getPayments = await PaymentModel.getPaymentByUserId(userId);
+        const existingPayment = getPayments[getPayments.length - 1];
+
+        // Si el usuario tiene un pago registrado y una suscripción activa
+        if (existingPayment && existingPayment.stripe_payment_id) {
+            try {
+                const subscription = await stripe.subscriptions.retrieve(existingPayment.stripe_payment_id);
+
+                if (subscription && subscription.status === 'active') {
+                    // Cancela la suscripción existente con reembolso parcial
+                    await stripe.subscriptions.cancel(subscription.id, {
+                        prorate: true, // Aplica prorrateo para el reembolso
+                    });
+
+                    // Crea un nuevo precio para el "upgrade"
+                    const newPrice = await stripe.prices.create({
+                        unit_amount: amount * 100, // Convierte el monto a centavos
+                        currency: 'mxn',
+                        recurring: { interval: 'month' },
+                        product_data: { name: 'Upgrade mensual para reforestación' },
+                    });
+
+                    // Crea una sesión de checkout para el "upgrade"
+                    const session = await stripe.checkout.sessions.create({
+                        payment_method_types: ['card'],
+                        line_items: [{
+                            price: newPrice.id,
+                            quantity: 1,
+                        }],
+                        mode: 'subscription',
+                        customer: subscription.customer, // Usa el cliente existente
+                        success_url: `${process.env.CLIENT_URL}/successPayment`,
+                        cancel_url: `${process.env.CLIENT_URL}/failurePayment`,
+                        metadata: { userId },
+                    });
+                    return res.status(200).json({ url: session.url, id: session.id });
+                };
+            } catch (error) {
+                console.error('Error al recuperar o actualizar la suscripción:', error);
+                // Si hay un error, continuamos con la creación de una nueva sesión de checkout
+            };
+        };
+
+        // Si no tiene una suscripción activa, crea una nueva sesión de checkout
         const price = await stripe.prices.create({
-            unit_amount: amount * 100, // Convierte el monto a centavos (Stripe usa centavos)
+            unit_amount: amount * 100, // Convierte el monto a centavos
             currency: 'mxn',
-            recurring: { interval: 'month' }, // Establece el pago recurrente mensual
-            product_data: { name: 'Suscripción mensual para reforestación' }, // Nombre de la suscripción
+            recurring: { interval: 'month' },
+            product_data: { name: 'Suscripción mensual para reforestación' },
         });
 
-        // Crea la sesión de Stripe Checkout para la suscripción
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
-            line_items: [
-                {
-                    price: price.id,
-                    quantity: 1,
-                },
-            ],
+            line_items: [{
+                price: price.id,
+                quantity: 1,
+            }],
             mode: 'subscription',
             customer_email: email.includes("@") ? email : undefined,
             success_url: `${process.env.CLIENT_URL}/successPayment`,
@@ -37,16 +78,15 @@ const createCheckoutSession = async (req, res) => {
             metadata: { userId },
         });
 
-        res.status(200).json({ url: session.url, id: session.id });
+        res.status(201).json({ url: session.url, id: session.id });
     } catch (error) {
         console.error('Error al crear la sesión de suscripción:', error);
         res.status(500).json({ message: 'Error al crear la sesión de suscripción' });
-    }
+    };
 };
 
 const verifyPayment = async (req, res) => {
     const { sessionId } = req.body;
-
     try {
         const session = await stripe.checkout.sessions.retrieve(sessionId);
 
@@ -54,7 +94,7 @@ const verifyPayment = async (req, res) => {
         if (session.payment_status === 'paid') {
             // Aquí puedes realizar el impacto en tu base de datos
             await PaymentModel.createPayment(
-                sessionId,
+                session.subscription,
                 session.amount_total / 100,
                 session.currency,
                 session.payment_status,
