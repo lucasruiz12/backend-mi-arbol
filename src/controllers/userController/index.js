@@ -5,7 +5,7 @@ const { formatDate } = require('../../utils/functions');
 
 // Crear un usuario
 const createUser = async (req, res) => {
-    const { name, email, password, carbonPoints } = req.body;
+    const { name, email, password, carbonPoints, categoryPoints } = req.body;
 
     if (!name || !email || !password) {
         return res.status(400).json({ success: false, message: 'Faltan datos' });
@@ -19,7 +19,7 @@ const createUser = async (req, res) => {
                 message: 'No se puede usar este correo',
             });
         };
-        const result = await userModel.createUser(name, email, password, carbonPoints);
+        const result = await userModel.createUser(name, email, password, carbonPoints, categoryPoints);
         const [user] = await userModel.getUserById(result.insertId);
         return res.status(201).json({ success: true, message: 'Usuario creado', user });
     } catch (error) {
@@ -51,7 +51,7 @@ const updateUser = async (req, res) => {
     }
 };
 
-const loginOrRegisterUser = async ({ name, email, password, carbonPoints, sub }) => {
+const loginOrRegisterUser = async ({ name, email, password, carbonPoints, categoryPoints, sub }) => {
     if (!email || !password) {
         throw new Error('Email y contraseña son requeridos');
     };
@@ -79,7 +79,7 @@ const loginOrRegisterUser = async ({ name, email, password, carbonPoints, sub })
         throw new Error('Credenciales inválidas');
     };
 
-    const result = await userModel.createUser(name, email, password, carbonPoints, sub);
+    const result = await userModel.createUser(name, email, password, carbonPoints, categoryPoints, sub);
     const [newUser] = await userModel.getUserById(result.insertId);
 
     // Retornar el nuevo usuario creado sin suscripción
@@ -87,14 +87,14 @@ const loginOrRegisterUser = async ({ name, email, password, carbonPoints, sub })
 };
 
 const loginUser = async (req, res) => {
-    const { name, email, password, carbonPoints, sub } = req.body;
+    const { name, email, password, carbonPoints, categoryPoints, sub } = req.body;
 
     if (!email || !password) {
         return res.status(400).json({ success: false, message: 'Email y contraseña son requeridos' });
     };
 
     try {
-        const { user, subscription, isNewUser, allSubscriptions } = await loginOrRegisterUser({ name, email, password, carbonPoints, sub });
+        const { user, subscription, isNewUser, allSubscriptions } = await loginOrRegisterUser({ name, email, password, carbonPoints, categoryPoints, sub });
 
         if (!subscription) {
             return res.status(200).json({

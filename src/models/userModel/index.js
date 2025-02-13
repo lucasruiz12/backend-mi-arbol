@@ -15,11 +15,11 @@ const getUserByEmail = async (email) => {
     };
 };
 
-const createUser = async (name, email, password, carbonPoints, sub) => {
+const createUser = async (name, email, password, carbonPoints, categoryPoints, sub) => {
     try {
         const [result] = await db.execute(
-            'INSERT INTO users (name, email, password, carbonPoints, sub) VALUES (?, ?, ?, ?, ?)',
-            [name, email, password, carbonPoints, sub ?? null]
+            'INSERT INTO users (name, email, password, carbonPoints, categoryPoints, sub) VALUES (?, ?, ?, ?, ?, ?)',
+            [name, email, password, carbonPoints, categoryPoints, sub ?? null]
         );
         return result;
     } catch (error) {
