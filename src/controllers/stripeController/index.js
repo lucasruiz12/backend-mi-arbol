@@ -67,6 +67,8 @@ const createCheckoutSession = async (req, res) => {
             product_data: { name: 'Suscripción mensual para reforestación' },
         });
 
+        // console.log("PRICE CREA BIEN", price);
+
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [{
@@ -81,6 +83,8 @@ const createCheckoutSession = async (req, res) => {
             cancel_url: `${process.env.CLIENT_URL_PROD}/failurePayment`,
             metadata: { userId },
         });
+
+        // console.log("SESSION CREA BIEN", session);
 
         res.status(201).json({ url: session.url, id: session.id });
     } catch (error) {
