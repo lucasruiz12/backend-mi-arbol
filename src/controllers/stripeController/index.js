@@ -45,8 +45,10 @@ const createCheckoutSession = async (req, res) => {
                         }],
                         mode: 'subscription',
                         customer: subscription.customer, // Usa el cliente existente
-                        success_url: `${process.env.CLIENT_URL}/successPayment`,
-                        cancel_url: `${process.env.CLIENT_URL}/failurePayment`,
+                        // success_url: `${process.env.CLIENT_URL}/successPayment`,
+                        success_url: `${process.env.CLIENT_URL_PROD}/successPayment`,
+                        // cancel_url: `${process.env.CLIENT_URL}/failurePayment`,
+                        cancel_url: `${process.env.CLIENT_URL_PROD}/failurePayment`,
                         metadata: { userId },
                     });
                     return res.status(200).json({ url: session.url, id: session.id });
@@ -73,8 +75,10 @@ const createCheckoutSession = async (req, res) => {
             }],
             mode: 'subscription',
             customer_email: email.includes("@") ? email : undefined,
-            success_url: `${process.env.CLIENT_URL}/successPayment`,
-            cancel_url: `${process.env.CLIENT_URL}/failurePayment`,
+            // success_url: `${process.env.CLIENT_URL}/successPayment`,
+            success_url: `${process.env.CLIENT_URL_PROD}/successPayment`,
+            // cancel_url: `${process.env.CLIENT_URL}/failurePayment`,
+            cancel_url: `${process.env.CLIENT_URL_PROD}/failurePayment`,
             metadata: { userId },
         });
 
