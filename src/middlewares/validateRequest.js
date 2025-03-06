@@ -14,4 +14,4 @@ const validateCheckoutRequest = (req, res, next) => {
     next();  // Si todo es válido, continúa con el siguiente middleware o controlador
 };
 
-module.exports = { validateCheckoutRequest };
+module.exports = validateCheckoutRequest ;

@@ -1,4 +1,5 @@
 const db = require('../../../db');
+const bcrypt = require('bcryptjs');
 
 
 const getUserByEmail = async (email) => {
@@ -17,9 +18,13 @@ const getUserByEmail = async (email) => {
 
 const createUser = async (name, email, password, carbonPoints, categoryPoints, sub) => {
     try {
+        // Generar hash de la contraseña
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
         const [result] = await db.execute(
             'INSERT INTO users (name, email, password, carbonPoints, categoryPoints, sub) VALUES (?, ?, ?, ?, ?, ?)',
-            [name, email, password, carbonPoints, categoryPoints, sub ?? null]
+            [name, email, hashedPassword, carbonPoints, categoryPoints, sub ?? null]
         );
         return result;
     } catch (error) {
@@ -57,14 +62,14 @@ const getUserById = async (userId) => {
     };
 };
 
-// const getUsers = async () => {
-//     try {
-//         const [rows] = await db.execute('SELECT * FROM users');
-//         return rows;
-//     } catch (error) {
-//         console.error('Error al obtener usuarios:', error);
-//         throw error;
-//     };
-// };
+const getUsers = async () => {
+    try {
+        const [rows] = await db.execute('SELECT * FROM users');
+        return rows;
+    } catch (error) {
+        console.error('Error al obtener usuarios:', error);
+        throw error;
+    };
+};
 
-module.exports = { createUser, updateUser, /*getUsers,*/ getUserById, getUserByEmail };
+module.exports = { createUser, updateUser, getUsers, getUserById, getUserByEmail };

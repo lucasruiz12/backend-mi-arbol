@@ -1,3 +1,5 @@
+const jwt = require('jsonwebtoken');
+
 const formatDate = (timestamp) => {
     const newDate = new Date(typeof timestamp === "number" ?  timestamp * 1000 : timestamp);
 
@@ -12,4 +14,9 @@ const formatDate = (timestamp) => {
     return formattedDate;
 };
 
-module.exports = { formatDate }
+
+const generateToken = (userId) => {
+    return jwt.sign({ id: userId }, process.env.JWT_SECRET);
+};
+
+module.exports = { formatDate, generateToken }
