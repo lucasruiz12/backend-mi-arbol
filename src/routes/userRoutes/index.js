@@ -9,7 +9,8 @@ router.post('/create', userController.createUser);
 router.post('/update', userController.updateUser);
 
 // // Ruta para obtener todos los usuarios
-router.get('/', authenticateJWT, userController.getAllUsers);
+// router.get('/', authenticateJWT, userController.getAllUsers);
+router.get('/', userController.getAllUsers);
 
 // Ruta para login
 router.post('/login', userController.loginUser);
