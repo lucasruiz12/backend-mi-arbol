@@ -4,6 +4,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const userRoutes = require('./src/routes/userRoutes');
 const stripeRoutes = require('./src/routes/stripeRoutes');
+const seedRoutes = require('./src/routes/seedRoutes');
 // const db = require('./db');
 
 const app = express();
@@ -21,6 +22,7 @@ app.use(bodyParser.json());
 // Rutas
 app.use('/api/users', userRoutes);
 app.use('/api/stripe', stripeRoutes);
+app.use('/api/seeds', seedRoutes);
 
 // Servidor
 app.listen(PORT, () => {

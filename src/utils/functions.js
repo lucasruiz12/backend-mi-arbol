@@ -19,4 +19,6 @@ const generateToken = (userId) => {
     return jwt.sign({ id: userId }, process.env.JWT_SECRET);
 };
 
-module.exports = { formatDate, generateToken }
+const cleanBOM = (str) => str.replace(/^\ufeff/, '');
+
+module.exports = { formatDate, generateToken, cleanBOM }
