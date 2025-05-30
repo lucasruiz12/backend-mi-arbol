@@ -1,13 +1,13 @@
 const db = require('../../../db');
 const { cleanBOM } = require('../../utils/functions');
 
-const createSeed = async (user_id, google_coordinates_lat, google_coordinates_lng) => {
+const createSeed = async (user_id, google_coordinates_lat, google_coordinates_lng, address) => {
     try {
         const lat = cleanBOM(google_coordinates_lat);
         const lng = cleanBOM(google_coordinates_lng);
         const [result] = await db.execute(
-            'INSERT INTO seeds (user_id, google_coordinates_lat, google_coordinates_lng) VALUES (?, ?, ?)',
-            [user_id, lat, lng]
+            'INSERT INTO seeds (user_id, google_coordinates_lat, google_coordinates_lng, address) VALUES (?, ?, ?, ?)',
+            [user_id, lat, lng, address]
         );
         return result;
     } catch (error) {

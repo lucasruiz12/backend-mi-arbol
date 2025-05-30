@@ -41,14 +41,14 @@ const getSeedsByUserId = async (req, res) => {
 
 // Crear un usuario
 const createSeed = async (req, res) => {
-    const { user_id, google_coordinates_lat, google_coordinates_lng } = req.body;
+    const { user_id, google_coordinates_lat, google_coordinates_lng, address } = req.body;
 
     if (!user_id || !google_coordinates_lat || !google_coordinates_lng) {
         return res.status(400).json({ success: false, message: 'Faltan datos' });
     };
 
     try {
-        const result = await seedModel.createSeed(user_id, google_coordinates_lat, google_coordinates_lng);
+        const result = await seedModel.createSeed(user_id, google_coordinates_lat, google_coordinates_lng, address);
         return res.status(201).json({ success: true, message: 'Semilla creada', seed: result });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Error al crear semilla', error });
