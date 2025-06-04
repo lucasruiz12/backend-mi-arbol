@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const userRoutes = require('./src/routes/userRoutes');
 const stripeRoutes = require('./src/routes/stripeRoutes');
 const seedRoutes = require('./src/routes/seedRoutes');
+const preregisterRoutes = require('./src/routes/preregisterRoutes');
 // const db = require('./db');
 
 const app = express();
@@ -23,6 +24,7 @@ app.use(bodyParser.json());
 app.use('/api/users', userRoutes);
 app.use('/api/stripe', stripeRoutes);
 app.use('/api/seeds', seedRoutes);
+app.use('/api/preregister', preregisterRoutes);
 
 // Servidor
 app.listen(PORT, () => {
