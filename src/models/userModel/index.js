@@ -23,8 +23,8 @@ const createUser = async (name, email, password, carbonPoints, categoryPoints, s
         const hashedPassword = await bcrypt.hash(password, salt);
 
         const [result] = await db.execute(
-            'INSERT INTO users (name, email, password, carbonPoints, categoryPoints, sub) VALUES (?, ?, ?, ?, ?, ?)',
-            [name, email, hashedPassword, carbonPoints, categoryPoints, sub ?? null]
+            'INSERT INTO users (name, email, password, carbonPoints, categoryPoints, sub, admin) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [name, email, hashedPassword, carbonPoints, categoryPoints, sub ?? null, 0]
         );
         return result;
     } catch (error) {
