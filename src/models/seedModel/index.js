@@ -11,7 +11,7 @@ const createSeed = async (user_id, google_coordinates_lat, google_coordinates_ln
         );
         return result;
     } catch (error) {
-        console.error('Error al crear semilla:', error);
+        console.error('Error al crear nueva semilla:', error);
         throw error;
     };
 };
